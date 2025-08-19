@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { fetchMovieData } from '../services/omdbService';
+import MovieDetails from './MovieDetails';
 
 export default function Search() {
   const [search, setSearch] = useState('');
@@ -8,15 +9,20 @@ export default function Search() {
   const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
   const [more, setMore] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
 
-    if (!search.trim()) return;
+    if (!search.trim() || loading) return;
 
     setLoading(true);
     setError(false);
     setMovies([]);
+    setPage(1); 
+    setMore(false);  
+
 
     try {
       const data = await fetchMovieData({
@@ -49,7 +55,16 @@ export default function Search() {
       });
 
       const newMovies = data.items || [];
-      setMovies((prev) => [...prev, ...newMovies]);
+      console.log("New movies from page", page, ":", newMovies.length);
+      console.log("New movie IDs:", newMovies.map(m => m.imdbID));
+    
+      
+      setMovies((prev) => {
+        const existingIds = new Set(prev.map(movie => movie.imdbID));
+        const uniqueNewMovies = newMovies.filter(movie => !existingIds.has(movie.imdbID));
+        return [...prev, ...uniqueNewMovies];
+      });
+      
       setPage((prev) => prev + 1);
       setMore(newMovies.length === 10);
     } catch (error) {
@@ -75,6 +90,7 @@ export default function Search() {
             {loading ? 'Searching...' : 'Search'}
             </button>
         </form>
+
         {loading && <p>Loading...</p>}
       {error && <p>Error fetching movies.</p>}
 
@@ -87,8 +103,12 @@ export default function Search() {
             {movie.Poster !== "N/A" ? (
               <img 
               src={movie.Poster}
-              alt={`${movie.title} poster`}
+              alt={`${movie.Title} poster`}
               className="w-32 h-48 object-cover mb-2"
+              onError={(e) => {
+            e.target.style.display = 'none';
+          e.target.nextSibling.style.display = 'flex';
+           }}
               />
             ) : (
               <div className="w-32 h-48 bg-gray-300 flex items-center justify-center text-sm">
@@ -99,6 +119,12 @@ export default function Search() {
             
           <p className="font-semibold text-center">{movie.Title}</p> 
           <p className="text-sm text-gray-600">{movie.Year}</p> 
+          <button 
+        onClick={() => setSelectedMovie(movie.imdbID)} 
+        className="ml-2 text-blue-600 underline"
+      >
+        View Details
+      </button>
           </li>
         ))}
       </ul>
@@ -106,6 +132,12 @@ export default function Search() {
       {more && !loading && (
         <button onClick={loadMore}>Load More</button>
       )}
+      {selectedMovie && (
+  <MovieDetails 
+    imdbID={selectedMovie} 
+    onClose={() => setSelectedMovie(null)} 
+  />
+)}
     </div>
   );
 }
