@@ -40,8 +40,8 @@ export default function MovieDetails({imdbID, onClose}) {
     
      
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg p-6 max-w-2xl max-h-screen overflow-y-auto">
+        <div className="fixed inset-0  bg-opacity-50 flex items-center justify-center p-4">
+        <div className="bg-black text-white rounded-lg p-6 max-w-2xl max-h-screen overflow-y-auto">
         
         <h2 className="font-bold">{movie.Title} ({movie.Year})</h2>
         <p><strong>Genre:</strong> {movie.Genre}</p>

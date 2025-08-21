@@ -1,15 +1,41 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { fetchMovieData } from '../services/omdbService';
 import MovieDetails from './MovieDetails';
+
 
 export default function Search() {
   const [search, setSearch] = useState('');
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [more, setMore] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
+
+  useEffect(() => {
+    const loadRandomMovies = async () => {
+      setLoading(true);
+      try {
+        const randomMovies = ["movie", "marvel", "disney", "action", "comedy", "anime", "adventure"];
+        const randomSearches = randomMovies[Math.floor(Math.random() * randomMovies.length)];
+
+        const data = await fetchMovieData ({
+           search: randomSearches,
+           setPage: 1
+        });
+         
+        setMovies(data.items || []);
+        setPage(2);
+        setMore(data.items && data.items.length === 10);
+        
+      } catch (error) {
+        console.error("Error loading popular movies:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+     loadRandomMovies()
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,12 +58,18 @@ export default function Search() {
 
       console.log("Search results:", data);
 
-      setMovies(data.items || []);
+      if (!data.items || data.items.length === 0) {
+     setError(`No results found for "${search}"`); 
+    setMovies([]);
+    } else {
+      setMovies(data.items);
       setPage(2);
-      setMore(data.items && data.items.length === 10);
+      setMore(data.items.length === 10);
+    }
+
     } catch (error) {
       console.error("Search error:", error);
-      setError(true);
+      setError("Error fetching movies.");
       setMovies([]);
     } finally {
       setLoading(false);
@@ -76,35 +108,42 @@ export default function Search() {
 
   return (
     <div>
+      
         <form onSubmit={handleSubmit}>
             <input type="text" 
-            placeholder="search movie"
-            className="border-2 border-gray-400 px-6 py-1 rounded"
+            placeholder="search movies ,genre, artist and trending"
+            id="movie-search"
+            name="search"
+            className="border-2 border-gray-800 
+            px-6 py-2 rounded-lg mt-6 mb-8 ml-4 w-1/3
+            bg-gray-700 text-white
+            "
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             />
-            <button type="submit"
             
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded transition-colors"
-            >
-            {loading ? 'Searching...' : 'Search'}
-            </button>
+            
         </form>
-
-        {loading && <p>Loading...</p>}
-      {error && <p>Error fetching movies.</p>}
+        
+        {loading && <p className="text-white">Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
 
       <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {movies.map((movie) => (
           <li 
           key={movie.imdbID}
-          className="border rounded shadow p-2 flex flex-col items-center"
+          className="border border-gray-700
+           rounded shadow p-2 flex flex-col items-center
+           transform transition-all duration-500 ease-in-out
+            hover:scale-105 hover:shadow-2xl
+           "
           >
             {movie.Poster !== "N/A" ? (
               <img 
               src={movie.Poster}
               alt={`${movie.Title} poster`}
-              className="w-32 h-48 object-cover mb-2"
+              className="w-32 h-48 object-cover mb-2
+              "
               onError={(e) => {
             e.target.style.display = 'none';
           e.target.nextSibling.style.display = 'flex';
@@ -117,7 +156,7 @@ export default function Search() {
 
             )}
             
-          <p className="font-semibold text-center">{movie.Title}</p> 
+          <p className="font-semibold text-center text-white">{movie.Title}</p> 
           <p className="text-sm text-gray-600">{movie.Year}</p> 
           <button 
         onClick={() => setSelectedMovie(movie.imdbID)} 

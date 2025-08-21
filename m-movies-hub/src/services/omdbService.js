@@ -12,6 +12,7 @@ export async function fetchMovieData({search, page = 1}) {
 
         if (response.data.Response === "False") {
             return { items: [] };
+            
         }
 
         return {
