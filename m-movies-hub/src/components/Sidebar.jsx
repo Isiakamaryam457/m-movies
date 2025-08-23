@@ -1,12 +1,22 @@
 import React, { useState } from 'react';
 import { FaVideo, FaPlus, FaHeart, FaBars, FaTimes, FaPlayCircle } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
+import useFavoritesStore from './stores/favoritesStore';
 
 
 export default function SideBar() {
   const [isOpen, setIsOpen] = useState(false);
 
+  const favoritesCount = useFavoritesStore((state) => state.getFavoritesCount());
+   const navigate = useNavigate();
+
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    setIsOpen(false);
   };
 
   return (
@@ -38,20 +48,31 @@ export default function SideBar() {
            <button><FaPlayCircle className="text-3xl sm:text-2xl md:text-2xl lg:text-3xl ml-1" /></button>
                 <div className="mt-16 pt-14 lg:pt-0">
           <ul className="space-y-4">
-            <li className="flex items-center gap-2 cursor-pointer hover:text-blue-400">
+            <li className="flex items-center gap-2 cursor-pointer hover:text-blue-400"
+            onClick={() => handleNavigation("/movies")}
+            >
               <FaVideo /> Movies
             </li>
-            <li className="flex items-center gap-2 cursor-pointer hover:text-blue-400">
+            <li className="flex items-center gap-2 cursor-pointer hover:text-blue-400"
+            onClick={() => handleNavigation("/watchlist")}
+            >
               <FaPlus /> Watchlist
             </li>
-            <li className="flex items-center gap-2 cursor-pointer hover:text-blue-400">
+            <li className="flex items-center gap-2 cursor-pointer hover:text-blue-400"
+            onClick={() => handleNavigation("favorites")}
+            >
               <FaHeart /> Favorites
+              {favoritesCount > 0 && (
+                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center animate-pulse">
+                  {favoritesCount}
+                </span>
+                )}
             </li>
           </ul>
         </div>
 
         <div className="mt-32">
-          <h3 className="text-gray-400 mb-2">Recent Searches</h3>
+          <h3 className="text-gray-400 mb-3">Recent Searches</h3>
           <ul className="space-y-2 text-sm text-gray-300">
             <li className="cursor-pointer hover:text-white">Zombies Holocaust</li>
             <li className="cursor-pointer hover:text-white">Resident Evil</li>

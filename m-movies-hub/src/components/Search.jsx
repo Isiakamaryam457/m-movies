@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { fetchMovieData } from '../services/omdbService';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import { fetchMovieData, fetchMovieDetails } from '../services/omdbService';
 import MovieDetails from './MovieDetails';
+import useFavoritesStore from './stores/favoritesStore';
 
 
 export default function Search() {
@@ -12,6 +14,8 @@ export default function Search() {
   const [more, setMore] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
 
+
+  const { isFavorite, toggleFavorite } = useFavoritesStore();
   useEffect(() => {
     const loadRandomMovies = async () => {
       setLoading(true);
@@ -21,7 +25,7 @@ export default function Search() {
 
         const data = await fetchMovieData ({
            search: randomSearches,
-           setPage: 1
+           page: 1
         });
          
         setMovies(data.items || []);
@@ -87,9 +91,7 @@ export default function Search() {
       });
 
       const newMovies = data.items || [];
-      console.log("New movies from page", page, ":", newMovies.length);
-      console.log("New movie IDs:", newMovies.map(m => m.imdbID));
-    
+      
       
       setMovies((prev) => {
         const existingIds = new Set(prev.map(movie => movie.imdbID));
@@ -106,9 +108,24 @@ export default function Search() {
     }
   };
 
+  const handleFavoriteClick = async (movie, e) => {
+    e.stopPropagation();
+    if (!movie.Genre && !isFavorite(movie.imdbID)) {
+    try {
+      const fullMovieDetails = await fetchMovieDetails(movie.imdbID);
+      toggleFavorite(fullMovieDetails);
+    } catch (error) {
+      console.error('Error fetching movie details:', error);
+      // Fallback to basic movie data
+      toggleFavorite(movie);
+    }
+  } else {
+    toggleFavorite(movie);
+  }
+  };
+
   return (
-    <div>
-      
+    <div className="min-h-full bg-black p-4">
         <form onSubmit={handleSubmit}>
             <input type="text" 
             placeholder="search movies ,genre, artist and trending"
@@ -128,16 +145,26 @@ export default function Search() {
         {loading && <p className="text-white">Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {movies.map((movie) => (
           <li 
           key={movie.imdbID}
           className="border border-gray-700
            rounded shadow p-2 flex flex-col items-center
            transform transition-all duration-500 ease-in-out
-            hover:scale-105 hover:shadow-2xl
+            hover:scale-105 hover:shadow-2xl relative 
            "
           >
+          <button onClick={(e) => handleFavoriteClick(movie, e)}
+            className="absolute top-2 right-2 z-10 p-1 rounded-full bg-black bg-opacity-50 hover:bg-opacity-75 transition-all"
+              aria-label={isFavorite(movie.imdbID) ? 'Remove from favorites' : 'Add to favorites'}
+              >
+            {isFavorite(movie.imdbID) ? (
+                <FaHeart className="text-red-500 text-lg" />
+              ) : (
+                <FaRegHeart className="text-white text-lg" />
+              )}
+          </button>
             {movie.Poster !== "N/A" ? (
               <img 
               src={movie.Poster}
@@ -150,7 +177,7 @@ export default function Search() {
            }}
               />
             ) : (
-              <div className="w-32 h-48 bg-gray-300 flex items-center justify-center text-sm">
+              <div className="w-32 h-48 bg-gray-700 text-black flex items-center justify-center text-sm">
           No Image
         </div>
 
@@ -169,7 +196,7 @@ export default function Search() {
       </ul>
 
       {more && !loading && (
-        <button onClick={loadMore}>Load More</button>
+        <button onClick={loadMore} className="bg-blue-600 text-white p-2 rounded m-4">Load More</button>
       )}
       {selectedMovie && (
   <MovieDetails 
