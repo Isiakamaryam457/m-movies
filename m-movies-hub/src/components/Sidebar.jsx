@@ -40,14 +40,14 @@ export default function SideBar() {
       
       <div
         className={`
-          w-64 text-white flex flex-col min-h-screen p-4 border border-gray-500 bg-black
+          w-64 text-white flex flex-col min-h-screen p-3 border border-gray-500 bg-black
           fixed lg:static top-0 left-0 z-40 transition-transform duration-500 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
            <button><FaPlayCircle className="text-3xl sm:text-2xl md:text-2xl lg:text-3xl ml-1" /></button>
-                <div className="mt-16 pt-14 lg:pt-0">
-          <ul className="space-y-4">
+                <div className="mt-12 pt-10 lg:pt-0">
+          <ul className="space-y-3">
             <li className="flex items-center gap-2 cursor-pointer hover:text-blue-400"
             onClick={() => handleNavigation("/movies")}
             >

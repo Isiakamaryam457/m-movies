@@ -181,17 +181,22 @@ if (!movie.Genre) {
    <div className="min-h-full bg-black p-4">
        <form onSubmit={handleSubmit}>
            <input type="text"
-           placeholder="search movies ,genre, artist and trending"
+           placeholder="search movies"
            id="movie-search"
            name="search"
            className="border-2 border-gray-800
-           px-6 py-2 rounded-lg mt-6 mb-8 ml-4 w-1/3
+           px-2 py-2 rounded-lg mt-6 mb-8 ml-1 w-1/3
            bg-gray-700 text-white
            "
            value={search}
            onChange={(e) => setSearch(e.target.value)}
            />
-          
+    <button
+    type="submit"
+    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow transition duration-200"
+  >
+    Search
+  </button>
           
        </form>
       
