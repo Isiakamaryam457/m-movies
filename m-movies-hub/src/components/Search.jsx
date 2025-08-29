@@ -3,7 +3,8 @@ import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import { fetchMovieData, fetchMovieDetails } from '../services/omdbService';
 import MovieDetails from './MovieDetails';
 import useFavoritesStore from './stores/favoritesStore';
-
+import  TrailerModal  from './TrailerModal';
+import { fetchMovieTrailer } from '../services/trailerService';
 
 export default function Search() {
  const [search, setSearch] = useState('');
@@ -14,6 +15,10 @@ export default function Search() {
  const [more, setMore] = useState(false);
  const [selectedMovie, setSelectedMovie] = useState(null);
  const [imageErrors, setImageErrors] = useState(new Set());
+ const [trailerData, setTrailerData] = useState({});
+ const [showTrailer, setShowTrailer] = useState(false);
+ const [loadingTrailer, setLoadingTrailer] = useState('');
+ const [currentTrailerMovie, setCurrentTrailerMovie] = useState(null);
 
 
  const { isFavorite, toggleFavorite } = useFavoritesStore();
@@ -59,6 +64,8 @@ export default function Search() {
    setMore(false); 
 
 
+
+
    try {
      const data = await fetchMovieData({
        search: search.trim(),
@@ -69,9 +76,9 @@ export default function Search() {
      console.log("Search results:", data);
 
 
-     if (!data.items || data.items.length === 0) {
+    if (!data.items || data.items.length === 0) {
     setError(`No results found for "${search}"`);
-   setMovies([]);
+    setMovies([]);
    } else {
      setMovies(data.items);
      setPage(2);
@@ -130,19 +137,45 @@ export default function Search() {
  }
 
 
- toggleFavorite(movie)
-   if (!movie.Genre) {
-   try {
-     const fullMovieDetails = await fetchMovieDetails(movie.imdbID);
-     toggleFavorite(movie);
-     toggleFavorite(fullMovieDetails);
-   } catch (error) {
-     console.error('Error fetching movie details:', error);
-    
-   }
- }
- };
+if (!movie.Genre) {
+      try {
+        const fullMovieDetails = await fetchMovieDetails(movie.imdbID);
+        toggleFavorite(fullMovieDetails);
+      } catch (error) {
+        console.error('Error fetching movie details:', error);
+        toggleFavorite(movie);
+      }
+    } else {
+      toggleFavorite(movie);
+    }
+  };
+ const handleWatchTrailer = async (movie) => {
+    if (trailerData[movie.imdbID]) {
+      setCurrentTrailerMovie(movie);
+      setShowTrailer(true);
+      return;
+    }
 
+    setLoadingTrailer(movie.imdbID);
+    try {
+      const trailer = await fetchMovieTrailer(movie.imdbID);
+      if (trailer) {
+        setTrailerData(prev => ({
+          ...prev,
+          [movie.imdbID]: trailer
+        }));
+        setCurrentTrailerMovie(movie);
+        setShowTrailer(true);
+      } else {
+        alert('Sorry, no trailer found for this movie.');
+      }
+    } catch (error) {
+      alert('Error loading trailer. Please try again.');
+      
+    } finally {
+      setLoadingTrailer('');
+    }
+  };
 
  return (
    <div className="min-h-full bg-black p-4">
@@ -157,7 +190,8 @@ export default function Search() {
            "
            value={search}
            onChange={(e) => setSearch(e.target.value)}
-           />   
+           />
+          
           
        </form>
       
@@ -199,18 +233,26 @@ export default function Search() {
              <div className="w-32 h-48 bg-gray-700 text-black flex items-center justify-center text-sm">
          No Image
        </div>
-
-
            )}
           
          <p className="font-semibold text-center text-white">{movie.Title}</p>
          <p className="text-sm text-gray-600">{movie.Year}</p>
-         <button
-       onClick={() => setSelectedMovie(movie.imdbID)}
-       className="ml-2 text-blue-600 underline"
-     >
-       View Details
-     </button>
+        <div className="flex gap-2 mt-2">
+              <button
+                onClick={() => setSelectedMovie(movie.imdbID)}
+                className="text-blue-600 underline text-sm"
+              >
+                View Details
+              </button>
+              
+              <button
+                onClick={() => handleWatchTrailer(movie)}
+                disabled={loadingTrailer === movie.imdbID}
+                className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors text-sm"
+              >
+                {loadingTrailer === movie.imdbID ? 'Loading...' : '🎬 Trailer'}
+              </button>
+            </div>
          </li>
        ))}
      </ul>
@@ -225,6 +267,17 @@ export default function Search() {
    onClose={() => setSelectedMovie(null)}
  />
 )}
+{currentTrailerMovie && (
+        <TrailerModal
+          videoId={trailerData[currentTrailerMovie.imdbID]?.videoId}
+          movieTitle={currentTrailerMovie.Title}
+          isOpen={showTrailer}
+          onClose={() => {
+            setShowTrailer(false);
+            setCurrentTrailerMovie(null);
+          }}
+        />
+      )}
    </div>
  );
 }
