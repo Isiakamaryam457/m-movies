@@ -188,7 +188,7 @@ if (!movie.Genre) {
    <div className="min-h-full bg-black p-4">
        <form onSubmit={handleSubmit}>
            <input type="text"
-           placeholder="search movies by title"
+           placeholder="search for movies by title"
            id="movie-search"
            name="search"
            className="border-2 border-gray-800

@@ -82,6 +82,12 @@ export default function SideBar() {
             <li className="cursor-pointer hover:text-white">Star Wars</li>
           </ul>
         </div>
+        <footer className="text-white text-sm py-4 mt-auto border-t border-gray-700">
+          <p className="text-center text-gray-400">
+            &copy; {new Date().getFullYear()} M-Movies. All rights reserved.
+          </p>
+        </footer>
+
       </div>
     </>
   );
