@@ -19,6 +19,7 @@ export default function Search() {
  const [showTrailer, setShowTrailer] = useState(false);
  const [loadingTrailer, setLoadingTrailer] = useState('');
  const [currentTrailerMovie, setCurrentTrailerMovie] = useState(null);
+const [currentSearchTerm, setCurrentSearchTerm] = useState('');
 
 
  const { isFavorite, toggleFavorite } = useFavoritesStore();
@@ -26,9 +27,9 @@ export default function Search() {
    const loadRandomMovies = async () => {
      setLoading(true);
      try {
-       const randomMovies = ["crime", "movie", "marvel", "disney", "action", "comedy", "anime", "adventure", "thriller", "horror"];
+       const randomMovies = ["sinners", "the kingdom", "bloodlust", "Spider-Man", "jurassic world", "Avengers", "Star Wars", "Harry Potter", "Iron Man", "Superman", "Wonder Woman", "Black Panther", "Captain America"];
        const randomSearches = randomMovies[Math.floor(Math.random() * randomMovies.length)];
-
+      setCurrentSearchTerm(randomSearches);
 
        const data = await fetchMovieData ({
           search: randomSearches,
@@ -63,6 +64,7 @@ export default function Search() {
    setPage(1);
    setMore(false); 
 
+setCurrentSearchTerm(search.trim());
 
 
 
@@ -103,7 +105,7 @@ export default function Search() {
    setLoading(true);
    try {
      const data = await fetchMovieData({
-       search: search.trim(),
+       search: currentSearchTerm,
        page,
      });
 
@@ -159,7 +161,10 @@ if (!movie.Genre) {
     setLoadingTrailer(movie.imdbID);
     try {
       const trailer = await fetchMovieTrailer(movie.imdbID);
+      
+      
       if (trailer) {
+        
         setTrailerData(prev => ({
           ...prev,
           [movie.imdbID]: trailer
@@ -167,9 +172,11 @@ if (!movie.Genre) {
         setCurrentTrailerMovie(movie);
         setShowTrailer(true);
       } else {
+       
         alert('Sorry, no trailer found for this movie.');
       }
     } catch (error) {
+       
       alert('Error loading trailer. Please try again.');
       
     } finally {
@@ -185,7 +192,7 @@ if (!movie.Genre) {
            id="movie-search"
            name="search"
            className="border-2 border-gray-800
-           px-2 py-2 rounded-lg mt-6 mb-8 ml-1 w-1/3
+           px-1 py-2 rounded-lg mt-6 mb-8 ml-1
            bg-gray-700 text-white
            "
            value={search}
@@ -197,7 +204,7 @@ if (!movie.Genre) {
   >
     Search
   </button>
-          
+         
        </form>
       
        {loading && <p className="text-white">Loading...</p>}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaVideo, FaPlus, FaHeart, FaBars, FaTimes, FaPlayCircle } from "react-icons/fa";
+import { FaVideo, FaPlus, FaHeart, FaBars, FaTimes, } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import useFavoritesStore from './stores/favoritesStore';
 
@@ -45,8 +45,10 @@ export default function SideBar() {
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-           <button><FaPlayCircle className="text-3xl sm:text-2xl md:text-2xl lg:text-3xl ml-1" /></button>
-                <div className="mt-12 pt-10 lg:pt-0">
+           <h3 className="font-jacques text-gray-400 text-l sm:text-xl lg:text-2xl whitespace-nowrap mt-12"> M-Movies Hub
+                        </h3>
+                <div className="mt-4 sm:mt-6 lg:mt-12 pt-2 lg:pt-5">
+                 
           <ul className="space-y-3">
             <li className="flex items-center gap-2 cursor-pointer hover:text-blue-400"
             onClick={() => handleNavigation("/movies")}
@@ -71,7 +73,7 @@ export default function SideBar() {
           </ul>
         </div>
 
-        <div className="mt-32">
+        <div className="mt-8 sm:mt-16 lg:mt-32">
           <h3 className="text-gray-400 mb-3">Recent Searches</h3>
           <ul className="space-y-2 text-sm text-gray-300">
             <li className="cursor-pointer hover:text-white">Zombies Holocaust</li>
